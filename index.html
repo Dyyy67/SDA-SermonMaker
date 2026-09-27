@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+    <meta name="theme-color" content="#241B2F" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#FBF9F4" media="(prefers-color-scheme: light)" />
+    <meta name="description" content="Kerygma — a Christ-centered sermon builder for pastors and teachers, designed for the phone in your hand." />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" href="/SDA-SermonMaker/icons/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/SDA-SermonMaker/icons/icon-192.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <title>Kerygma — Sermon Builder</title>
+    <script type="module" crossorigin src="/SDA-SermonMaker/assets/index-xHdidYcM.js"></script>
+    <link rel="stylesheet" crossorigin href="/SDA-SermonMaker/assets/index-IoRx5Csn.css">
+  <link rel="manifest" href="/SDA-SermonMaker/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/SDA-SermonMaker/registerSW.js"></script></head>
+  <body>
+    <script>
+      (function () {
+        var r = sessionStorage.redirect;
+        delete sessionStorage.redirect;
+        if (r && r !== location.href) {
+          history.replaceState(null, '', r.replace(location.origin, ''));
+        }
+      })();
+    </script>
+    <div id="root"></div>
+  </body>
+</html>
