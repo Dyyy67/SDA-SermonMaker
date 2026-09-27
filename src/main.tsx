@@ -9,7 +9,7 @@ import './index.css'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <BrowserRouter>
+    <BrowserRouter basename="/SDA-SermonMaker">
       <AuthProvider>
         <ToastProvider>
           <PreferencesProvider>
