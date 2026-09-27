@@ -1,5 +1,7 @@
 import type { GenerationStage, Sermon, SermonDraftInput, SermonSection, SourceCard } from '../types'
 import { FUNDAMENTAL_BELIEFS, KJV_SAMPLE, egwPlaceholder } from '../data/reference'
+import { hasApiKeys } from './apiKeys'
+import { generateSermonWithGemini } from './geminiClient'
 
 export const STAGE_LABELS: Record<GenerationStage, string> = {
   idle: 'Ready',
@@ -134,18 +136,33 @@ function wait(ms: number, signal: AbortSignal) {
  * callback and AbortSignal plumbing here are already shaped for that.
  */
 export async function generateSermon(input: SermonDraftInput, opts: GenerateOptions): Promise<Sermon> {
+  const now0 = Date.now()
   for (const stage of STAGE_ORDER) {
     opts.onStage(stage)
-    await wait(420 + Math.random() * 380, opts.signal)
+    if (Date.now() - now0 < 4000) {
+      await wait(180 + Math.random() * 160, opts.signal)
+    }
   }
+
+  let title = input.topic || 'Untitled sermon'
+  let sections: SermonSection[]
+
+  if (hasApiKeys()) {
+    const result = await generateSermonWithGemini(input, opts.signal)
+    title = result.title || title
+    sections = result.sections
+  } else {
+    sections = buildSections(input)
+  }
+
   opts.onStage('done')
 
   const now = new Date().toISOString()
   return {
     id: crypto.randomUUID(),
-    title: input.topic || 'Untitled sermon',
+    title,
     input,
-    sections: buildSections(input),
+    sections,
     createdAt: now,
     updatedAt: now,
     bookmarked: false,

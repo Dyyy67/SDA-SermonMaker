@@ -10,7 +10,10 @@ import {
   Download,
   Info,
   Shield,
-  FileText
+  FileText,
+  Trash2,
+  Plus,
+  KeyRound
 } from 'lucide-react'
 import { AppShell, ScreenHeader } from '../components/layout/AppShell'
 import { Card } from '../components/ui/Card'
@@ -21,6 +24,7 @@ import { useAuth } from '../context/AuthContext'
 import { usePreferences } from '../context/PreferencesContext'
 import { usePwaInstall } from '../lib/usePwaInstall'
 import { getUsage } from '../lib/store'
+import { addApiKey, listApiKeys, maskKey, removeApiKey, type ApiKeyEntry } from '../lib/apiKeys'
 import { useToast } from '../context/ToastContext'
 import type { Audience, SermonLength, SermonStyle, Translation, UsageInfo } from '../types'
 
@@ -51,6 +55,28 @@ export default function Settings() {
   const { show } = useToast()
   const [usage, setUsage] = useState<UsageInfo | null>(null)
   const [sheet, setSheet] = useState<'about' | 'privacy' | 'terms' | null>(null)
+  const [apiKeys, setApiKeys] = useState<ApiKeyEntry[]>([])
+  const [newKeyLabel, setNewKeyLabel] = useState('')
+  const [newKeyValue, setNewKeyValue] = useState('')
+
+  useEffect(() => {
+    setApiKeys(listApiKeys())
+  }, [])
+
+  function handleAddKey() {
+    if (!newKeyValue.trim()) return
+    addApiKey(newKeyValue, newKeyLabel)
+    setApiKeys(listApiKeys())
+    setNewKeyLabel('')
+    setNewKeyValue('')
+    show('Gemini API key added.', 'success')
+  }
+
+  function handleRemoveKey(id: string) {
+    removeApiKey(id)
+    setApiKeys(listApiKeys())
+    show('API key removed.', 'info')
+  }
 
   useEffect(() => {
     if (!user) return
@@ -173,6 +199,65 @@ export default function Settings() {
             {usage ? new Date(usage.resetsOn).toLocaleDateString() : '—'}
           </span>
         </Row>
+      </Section>
+
+      <Section icon={KeyRound} title="Gemini API keys">
+        <p className="mb-3 text-xs text-ink-600 dark:text-paper-200/70">
+          {apiKeys.length > 0
+            ? 'Sermons are generated with Gemini using these keys. If one runs out of quota, the next is tried automatically.'
+            : 'No key added yet — sermons are generated from local templates until you add one.'}
+        </p>
+
+        {apiKeys.length > 0 && (
+          <div className="mb-4 flex flex-col divide-y divide-ink-900/[0.06] dark:divide-white/10">
+            {apiKeys.map((k) => (
+              <div key={k.id} className="flex items-center justify-between gap-3 py-2.5">
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium">{k.label}</p>
+                  <p className="font-mono text-xs text-ink-600 dark:text-paper-200/70">{maskKey(k.key)}</p>
+                </div>
+                <button
+                  onClick={() => handleRemoveKey(k.id)}
+                  aria-label={`Remove ${k.label}`}
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-red-600 hover:bg-red-500/10 dark:text-red-400"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div className="flex flex-col gap-2 border-t border-ink-900/[0.06] pt-3 dark:border-white/10">
+          <input
+            value={newKeyLabel}
+            onChange={(e) => setNewKeyLabel(e.target.value)}
+            placeholder='Label (optional, e.g. "Personal key")'
+            className="h-10 w-full rounded-lg border border-ink-900/15 bg-transparent px-3 text-sm outline-none focus:border-gold-500 dark:border-white/15"
+          />
+          <input
+            value={newKeyValue}
+            onChange={(e) => setNewKeyValue(e.target.value)}
+            placeholder="Paste Gemini API key"
+            type="password"
+            className="h-10 w-full rounded-lg border border-ink-900/15 bg-transparent px-3 font-mono text-sm outline-none focus:border-gold-500 dark:border-white/15"
+          />
+          <Button variant="secondary" size="md" onClick={handleAddKey} disabled={!newKeyValue.trim()}>
+            <Plus size={15} /> Add key
+          </Button>
+          <p className="text-xs text-ink-600 dark:text-paper-200/70">
+            Get a free key at{' '}
+            <a
+              href="https://aistudio.google.com/app/apikey"
+              target="_blank"
+              rel="noreferrer"
+              className="font-medium text-gold-700 underline dark:text-gold-400"
+            >
+              aistudio.google.com/app/apikey
+            </a>
+            . Keys are stored only in this browser.
+          </p>
+        </div>
       </Section>
 
       <Section icon={Scroll} title="Sources">
